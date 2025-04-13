@@ -12,6 +12,8 @@
     - [Scheduled Tasks](#scheduled-tasks)
 - [Configuration](#configuration)
 
+![bupstash systemd logo](images/logo.png)
+
 ## Description
 Semi-automated [systemd services](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html) for [bupstash](https://bupstash.io/) client.
 
