@@ -1,0 +1,25 @@
+[Unit]
+Description=Backup service for bupstash
+OnSuccess=bupstash-notify-success@%i.service
+OnFailure=bupstash-notify-fail@%i.service
+ConditionFileNotEmpty=%h/.config/bupstash/config
+ConditionPathIsDirectory=%h/.local/bupstash/
+Requires=check-metered-connection.service
+After=check-metered-connection.service
+
+[Service]
+Type=oneshot
+Environment="DISPLAY=:0" "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus" "SSH_AUTH_SOCK=/run/user/%U/keyring/ssh"
+EnvironmentFile=%h/.config/bupstash/config
+EnvironmentFile=-/tmp/bupstash-backup-ephemeral.env
+ExecStartPre=sh -c 'echo STARTTIMESTAMP=$(date "+%%Y/%%m/%%d %%H:%%M:%%S") > /tmp/bupstash-backup-ephemeral.env'
+ExecStartPre=sh -c 'echo LOGFILENAME=$(date "+%%Y%%m%%d%%H%%M%%S")%i >> /tmp/bupstash-backup-ephemeral.env'
+ExecStartPre=sh -c 'echo === Start === > %h/.local/bupstash/${LOGFILENAME}.log'
+ExecStartPre=busctl --user call org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications Notify susssasa{sv}i 'bupstash' 0 drive-multidisk 'Bupstash' 'Starting backup process of %I' 0 0 5000
+ExecStartPre=sh -c '[ -z "${NTFY_SERVER}" -o -z "${NTFY_TOPIC}" -o -z "${NTFY_TOKEN}" ] && true || curl -s -o /dev/null -H"Authorization: Bearer ${NTFY_TOKEN}" -H "X-Priority: 3" -H "X-Title: %H: bupstash" -H "X-Tags: package, minidisc" -d "Starting backup of %I" ${NTFY_SERVER}/${NTFY_TOPIC}'
+ExecStart=sh -xc 'bupstash put --ignore-permission-errors --print-file-actions --no-progress%%EXCLUSIONS%% starttimestamp="${STARTTIMESTAMP}" path="%I" hostname="%l" auto="yes" "%I" 2>> %h/.local/bupstash/${LOGFILENAME}.log'
+ExecStartPost=sh -c 'echo === End === >> %h/.local/bupstash/${LOGFILENAME}.log'
+ExecStartPost=rm -f /tmp/bupstash-backup-ephemeral.env
+
+[Install]
+WantedBy=default.target

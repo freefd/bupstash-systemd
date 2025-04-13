@@ -1,0 +1,11 @@
+[Unit]
+Description=Notify when bupstash backup failed
+
+[Service]
+Environment="DISPLAY=:0" "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus"
+EnvironmentFile=%h/.config/bupstash/config
+ExecStart=busctl --user call org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications Notify susssasa{sv}i 'bupstash' 0 dialog-error 'Bupstash' 'Backup of %I failed, run "journalctl -t bupstash -xe" for info' 0 0 5000
+ExecStartPost=sh -c '[ -z "${NTFY_SERVER}" -o -z "${NTFY_TOPIC}" -o -z "${NTFY_TOKEN}" ] && true || curl -s -o /dev/null -H "Authorization: Bearer ${NTFY_TOKEN}" -H "X-Priority: 3" -H "X-Title: %H: bupstash" -H "X-Tags: x, minidisc" -d "Backup of %I failed, run \\"journalctl -t bupstash -xe\\" for info" ${NTFY_SERVER}/${NTFY_TOPIC}'
+
+[Install]
+WantedBy=default.target

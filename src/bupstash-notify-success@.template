@@ -1,0 +1,11 @@
+[Unit]
+Description=Notify when backupupstash backup successfully finished
+
+[Service]
+Environment="DISPLAY=:0" "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus"
+EnvironmentFile=%h/.config/bupstash/config
+ExecStart=busctl --user call org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications Notify susssasa{sv}i 'bupstash' 0 emblem-default 'Bupstash' 'Backup of %I has been successfully created' 0 0 5000
+ExecStartPost=sh -c '[ -z "${NTFY_SERVER}" -o -z "${NTFY_TOPIC}" -o -z "${NTFY_TOKEN}" ] && true || curl -s -o /dev/null -H "Authorization: Bearer ${NTFY_TOKEN}" -H "X-Priority: 3" -H "X-Title: %H: bupstash" -H "X-Tags: white_check_mark, minidisc" -d "Backup of %I has been successfully created" ${NTFY_SERVER}/${NTFY_TOPIC}'
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,9 @@
+*Cache*
+*cache*
+*gvfs*
+%h/.local/share/flatpak*
+%h/.local/share/TelegramDesktop*
+%h/.local/share/Trash*
+%h/.local/share/Webex*
+%h/.m2/repository*
+%h/.thunderbird/*/ImapMail*

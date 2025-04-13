@@ -1,0 +1,9 @@
+[Unit]
+Description=Backup timer for Bupstash
+
+[Timer]
+Unit=bupstash-backup@%i.service
+OnCalendar=%J
+
+[Install]
+WantedBy=timers.target

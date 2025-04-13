@@ -1,0 +1,9 @@
+[Unit]
+Description=Check if the current connection is metered
+
+[Service]
+Type=oneshot
+ExecStart=bash -c '[[ $(busctl --quiet --system get-property org.freedesktop.NetworkManager /org/freedesktop/NetworkManager org.freedesktop.NetworkManager Metered | grep -o '.$') =~ (1|3) ]] && { echo "Active connection is metered, exiting" | tee >(logger -t bupstash); exit 1; } || exit 0'
+
+[Install]
+WantedBy=bupstash-backup@.service 
